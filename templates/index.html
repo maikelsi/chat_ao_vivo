@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat WebSocket - Senai</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #36393f;
+            color: #dcddde;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #chat-container {
+            width: 400px;
+            background-color: #2f3136;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #messages {
+            list-style-type: none;
+            padding: 10px;
+            margin: 0;
+            height: 300px;
+            overflow-y: scroll;
+            flex: 1;
+        }
+
+        #messages li {
+            padding: 8px;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            background-color: #40444b;
+        }
+
+        #messages li:nth-child(odd) {
+            background-color: #4f545c;
+        }
+
+        #message-input {
+            display: flex;
+            padding: 10px;
+            background-color: #292b2f;
+        }
+
+        #message-input input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            margin-right: 8px;
+            background-color: #40444b;
+            color: #dcddde;
+        }
+
+        #message-input input[type="text"]::placeholder {
+            color: #72767d;
+        }
+
+        #message-input button {
+            padding: 10px 15px;
+            background-color: #7289da;
+            border: none;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        #message-input button:hover {
+            background-color: #5b6eae;
+        }
+
+        #footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #2f3136;
+            font-size: 12px;
+            color: #b9bbbe;
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            var socket = io();
+
+            socket.on('connect', () => {
+                const name = prompt("Por favor, insira seu nome:");
+                document.getElementById('name').value = name;
+                socket.emit('new_user', name);
+            });
+
+            socket.on('message', (msg) => {
+                const messageElement = document.createElement('li');
+                messageElement.innerText = msg;
+                document.getElementById('messages').appendChild(messageElement);
+                document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+            });
+
+            document.getElementById('sendMessage').addEventListener('click', sendMessage);
+
+            document.getElementById('message').addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+            function sendMessage() {
+                const name = document.getElementById('name').value;
+                const message = document.getElementById('message').value;
+                if (message) {
+                    socket.send(`${name}: ${message}`);
+                    document.getElementById('message').value = '';
+                } else {
+                    alert("Por favor, insira uma mensagem.");
+                }
+            }
+        });
+    </script>
+</head>
+<body>
+    <div id="chat-container">
+        <ul id="messages"></ul>
+        <div id="message-input">
+            <input type="hidden" id="name">
+            <input type="text" id="message" placeholder="Digite uma mensagem...">
+            <button id="sendMessage">Enviar</button>
+        </div>
+    </div>
+    <div id="footer">
+        <p>Chat desenvolvido para treinamento no Senai</p>
+    </div>
+</body>
+</html>
